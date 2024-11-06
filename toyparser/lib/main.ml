@@ -25,7 +25,29 @@ let rec eval : ast -> int_or_err = function
   | Add (e1,e2) ->
     let res1 = eval e1 in
     let res2 = eval e2 in
-    match res1, res2 with
+    (match res1, res2 with
     | Error err1, _ -> Error err1
     | _, Error err2 -> Error err2
-    | Ok v1, Ok v2 -> Ok (v1 + v2)
+    | Ok v1, Ok v2 -> Ok (v1 + v2))
+  | Sub (e1,e2) ->
+    let res1 = eval e1 in
+    let res2 = eval e2 in
+    (match res1, res2 with
+    | Error err1, _ -> Error err1
+    | _, Error err2 -> Error err2
+    | Ok v1, Ok v2 -> Ok (v1 - v2))
+  | Mul (e1,e2) ->
+    let res1 = eval e1 in
+    let res2 = eval e2 in
+    (match res1, res2 with
+    | Error err1, _ -> Error err1
+    | _, Error err2 -> Error err2
+    | Ok v1, Ok v2 -> Ok (v1 * v2))
+  | Div (e1,e2) ->
+    let res1 = eval e1 in
+    let res2 = eval e2 in
+    (match res1, res2 with
+    | _, Ok 0 -> failwith "Division by 0 not possible"
+    | Error err1, _ -> Error err1
+    | _, Error err2 -> Error err2
+    | Ok v1, Ok v2 -> Ok (v1 / v2))
