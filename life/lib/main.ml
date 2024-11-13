@@ -62,10 +62,14 @@ let count w = List.fold_left (fun s x -> s + count1 x) 0 w
     (* cell is born? *)
     alive_nb = 3
 *)
-let alive w i j rule =
+let alive w i j (rule : Rule.rule)  =
   let (cell, nb) = neighbours w i j in
   let alive_nb = count nb in
-  let (survival_rules, birth_rules) = rule in 
+  let rule_pair = match rule with
+        | Rule (s, b) -> (s, b)  
+        | Seq s -> (s, [])  
+  in
+  let (survival_rules, birth_rules) = rule_pair in 
   if cell then (* cell is alive *)
     List.mem alive_nb survival_rules
   else (* cell is dead *)

@@ -12,13 +12,10 @@ let _ = match Array.length(Sys.argv) with
 
     (* Parse la regola usando Rule_parser.parse *)
     let rule = parse rule_str in
-    let rule_pair = match rule with
-        | Rule (s, b) -> (s, b)  
-        | Seq s -> (s, [])       
-      in
+    
 
     (* Inizializza il mondo con la regola *)
-    let w = loop init_w  n_rounds rule_pair in
+    let w = loop init_w  n_rounds rule in
     display w;
 
     ignore (read_line ());
