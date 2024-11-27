@@ -9,3 +9,8 @@ type expr =
   | Succ of expr
   | Pred of expr
   | IsZero of expr
+
+type exprval = Bool of bool | Nat of int
+
+type exprtype = BoolT | NatT;;
+
