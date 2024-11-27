@@ -1,6 +1,7 @@
 open SarithexprLib.Main
+open SarithexprLib.Ast
 
-(*type wexprval = exprtype option*)
+type wexprval = exprtype option
 
 let string_of_wtype = function 
     Some t -> string_of_type t

@@ -101,44 +101,38 @@ let rec typecheck : expr -> exprtype = function
       | NatT ->
           raise
             (TypeError
-               (string_of_expr e ^ "has type NatT type BoolT is expected")))
+               (string_of_expr e ^ " has type Nat, type Bool is expected")))
   | And (e0, e1) | Or (e0, e1) -> (
       match (typecheck e0, typecheck e1) with
       | BoolT, BoolT -> BoolT
       | NatT, _ ->
           raise
             (TypeError
-               (string_of_expr e0 ^ "has type NatT type BoolT is expected"))
+               (string_of_expr e0 ^ " has type Nat, type Bool is expected"))
       | _, NatT ->
           raise
             (TypeError
-               (string_of_expr e1 ^ "has type NatT type BoolT is expected")))
+               (string_of_expr e1 ^ " has type Nat, type Bool is expected")))
   | Succ e | Pred e -> (
       match typecheck e with
       | NatT -> NatT
       | BoolT ->
           raise
             (TypeError
-               (string_of_expr e ^ "has type NatT type BoolT is expected")))
+               (string_of_expr e ^ " has type Nat, type Bool is expected")))
   | IsZero e -> (
       match typecheck e with
       | NatT -> BoolT
       | BoolT ->
           raise
             (TypeError
-               (string_of_expr e ^ "has type BoolT type NatT is expected")))
+               (string_of_expr e ^ " has type Bool, type Nat is expected")))
   | If (e0, e1, e2) -> (
       match (typecheck e0, typecheck e1, typecheck e2) with
-      | BoolT, BoolT, BoolT -> BoolT
+      | BoolT, ifthen, ifelse -> if ifthen = ifelse then ifthen else raise (TypeError (string_of_expr e2^" has type "^(string_of_type ifelse)^",but type "^(string_of_type ifthen)^" is expected"))
       | NatT, _, _ ->
           raise
             (TypeError
-               (string_of_expr e0 ^ "has type BoolT type NatT is expected"))
-      | _, NatT, _ ->
-          raise
-            (TypeError
-               (string_of_expr e1 ^ "has type BoolT type NatT is expected"))
-      | _, _, NatT ->
-          raise
-            (TypeError
-               (string_of_expr e2 ^ "has type BoolT type NatT is expected")))
+               (string_of_expr e0 ^ " has type Nat type Bool is expected"))
+      )
+
