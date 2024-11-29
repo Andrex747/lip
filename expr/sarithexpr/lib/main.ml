@@ -6,10 +6,10 @@ let rec string_of_expr = function
   | If (e0, e1, e2) ->
       "If(" ^ string_of_expr e0 ^ "," ^ string_of_expr e1 ^ ","
       ^ string_of_expr e2 ^ ")"
-  | Zero -> "Zero"
-  | Succ e0 -> "Succ" ^ string_of_expr e0
-  | Pred e0 -> "Pred" ^ string_of_expr e0
-  | IsZero e0 -> "IsZero" ^ string_of_expr e0
+  | Zero -> "0"
+  | Succ e0 -> "Succ(" ^ string_of_expr e0 ^ ")"
+  | Pred e0 -> "Pred(" ^ string_of_expr e0 ^ ")"
+  | IsZero e0 -> "IsZero(" ^ string_of_expr e0 ^ ")"
   | _ -> failwith "error"
 
 let string_of_val : exprval -> string = function
@@ -22,7 +22,11 @@ let parse (s : string) : expr =
   let ast = Parser.prog Lexer.read lexbuf in
   ast
 
-let rec is_nv = function Zero -> true | Succ e1 -> is_nv e1 | _ -> false
+let rec is_nv = function
+  | Zero -> true
+  | Succ e1 -> is_nv e1
+  | Pred e when e != Zero -> is_nv e
+  | _ -> false
 
 exception TypeError of string
 
@@ -70,13 +74,11 @@ let rec eval : expr -> exprval = function
       | Nat n -> if n = 0 then Bool true else Bool false
       | Bool _ -> failwith "incompatible value")
   | Pred e0 -> (
-      let v = eval e0 in
-      match v with
+      match eval e0 with
       | Bool _ -> failwith "incompatible value"
       | Nat n -> if n <= 0 then failwith "incompatible value" else Nat (n - 1))
   | Succ e0 -> (
-      let v = eval e0 in
-      match v with
+      match eval e0 with
       | Bool _ -> failwith "incompatible value"
       | Nat n -> if n < 0 then failwith "incompatible value" else Nat (n + 1))
   | And (e0, e1) -> (
@@ -113,7 +115,14 @@ let rec typecheck : expr -> exprtype = function
           raise
             (TypeError
                (string_of_expr e1 ^ " has type Nat, type Bool is expected")))
-  | Succ e | Pred e -> (
+  | Succ e -> (
+      match typecheck e with
+      | NatT -> NatT
+      | BoolT ->
+          raise
+            (TypeError
+               (string_of_expr e ^ " has type Nat, type Bool is expected")))
+  | Pred e when is_nv (Pred e) -> (
       match typecheck e with
       | NatT -> NatT
       | BoolT ->
@@ -129,10 +138,15 @@ let rec typecheck : expr -> exprtype = function
                (string_of_expr e ^ " has type Bool, type Nat is expected")))
   | If (e0, e1, e2) -> (
       match (typecheck e0, typecheck e1, typecheck e2) with
-      | BoolT, ifthen, ifelse -> if ifthen = ifelse then ifthen else raise (TypeError (string_of_expr e2^" has type "^(string_of_type ifelse)^",but type "^(string_of_type ifthen)^" is expected"))
+      | BoolT, ifthen, ifelse ->
+          if ifthen = ifelse then ifthen
+          else
+            raise
+              (TypeError
+                 (string_of_expr e2 ^ " has type " ^ string_of_type ifelse
+                ^ ",but type " ^ string_of_type ifthen ^ " is expected"))
       | NatT, _, _ ->
           raise
             (TypeError
-               (string_of_expr e0 ^ " has type Nat type Bool is expected"))
-      )
-
+               (string_of_expr e0 ^ " has type Nat type Bool is expected")))
+  | _ -> raise (TypeError "error")
