@@ -1,0 +1,27 @@
+
+** Conflict (shift/reduce) in state 30.
+** Tokens involved: WHILE VAR START_BLOCK SKIP IF
+** The following explanations concentrate on token WHILE.
+** This state is reached from prog after reading:
+
+START_BLOCK
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+prog 
+cmd EOF 
+(?)
+
+** In state 30, looking ahead at WHILE, shifting is permitted
+** because of the following sub-derivation:
+
+START_BLOCK cmd END_BLOCK 
+            . WHILE expr DO cmd 
+
+** In state 30, looking ahead at WHILE, reducing production
+** decls ->
+** is permitted because of the following sub-derivation:
+
+START_BLOCK decls cmd END_BLOCK // lookahead token appears because cmd can begin with WHILE
+            . 
