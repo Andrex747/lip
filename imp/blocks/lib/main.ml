@@ -82,7 +82,7 @@ let rec trace1 : conf -> conf = function
   | Cmd (Seq (c1, c2), st) -> (
       match trace1 (Cmd (c1, st)) with
       | Cmd (c1', st') -> Cmd (Seq (c1', c2), st')
-      | St st' ->  (Cmd (c2, st')))
+      | St st' -> Cmd (c2, st'))
   | Cmd (If (e, c1, c2), st) -> (
       match eval_expr st e with
       | Bool b -> if b then Cmd (c1, st) else Cmd (c2, st)
@@ -96,12 +96,11 @@ let rec trace1 : conf -> conf = function
       let new_st = eval_decl st dl in
       match trace1 (Cmd (c, new_st)) with
       | St st' -> St (make_state (popenv st') (getmem st') (getloc st'))
-      | Cmd (c', st') ->  Cmd (Block( c'), st'))
-  | Cmd (Block (c), st) ->
-    (
-    match trace1 (Cmd (c, st)) with
-    | St st' -> St (make_state (popenv st') (getmem st') (getloc st'))
-    | Cmd (c', st') ->  Cmd (Block( c'), st'))
+      | Cmd (c', st') -> Cmd (Block c', st'))
+  | Cmd (Block c, st) -> (
+      match trace1 (Cmd (c, st)) with
+      | St st' -> St (make_state (popenv st') (getmem st') (getloc st'))
+      | Cmd (c', st') -> Cmd (Block c', st'))
   | _ -> raise NoRuleApplies
 
 let trace (n_steps : int) (c : cmd) : conf list =
@@ -115,5 +114,3 @@ let trace (n_steps : int) (c : cmd) : conf list =
     else [ conf ]
   in
   helper n_steps conf0
-
-
