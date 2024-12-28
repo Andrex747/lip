@@ -15,6 +15,14 @@ let test_trace (cmd,n_steps,var,exp_val) =
     St s -> apply s var = exp_val
   | Cmd(_,_) -> failwith "program not terminated"
 
+let test_trace1 (cmd,n_steps, var) =
+  cmd
+  |> parse
+  |> fun c -> last (trace n_steps c)
+  |> fun t -> match t with
+    St s -> apply s var 
+  | Cmd(_,_) -> failwith "program not terminated"
+;;
 let%test "test_trace1" = test_trace
   ("int x; x:=51", 2, "x", 51)
 
@@ -63,10 +71,14 @@ let%test "test_trace14" = test_trace
 let%test "test_trace15" = test_trace
     ("int x; int y; fun f(x) { x:=20; return 0 }; x := 10; y := f(0); x := x+1", 20, "x", 11)
 
-let%test "test_boss" = test_trace
+    let%test "test_boss" = test_trace
     ({|
         int x;
         int r;
         fun f(n) { if n=0 then r:=1 else r:=n*f(n-1); return r };
         x := f(5)
     |}, 100, "x", 120)
+;;
+
+
+
